@@ -31,7 +31,7 @@ displayKeyboardBtn : Char -> Element
 displayKeyboardBtn char =
   (String.fromChar char)
   |> Text.fromString
-  |> Text.height 25
+  |> Text.height 21
   |> Text.leftAligned
   |> container 25 25 middle
 
@@ -66,7 +66,7 @@ displayWord guesses word  =
  |> intersperse ' '
  |> String.fromList
  |> Text.fromString
- |> Text.height 50
+ |> Text.height 34
  |> Text.centered
 
 displayGuesses guesses word =
@@ -75,7 +75,7 @@ displayGuesses guesses word =
   |> map String.fromChar
   |> String.join " "
   |> Text.fromString
-  |> Text.height 30
+  |> Text.height 21
   |> Text.centered
 
 blackRect : Float -> Float -> Form
@@ -112,7 +112,7 @@ gallowsAndKeyboard hangman =
       spacer 0 10,
       displayGallows hangman
     ],
-    flow down [spacer 0 190, keyboard hangman]
+    container 185 340 midBottom (keyboard hangman)
   ]
 
 previousGuesses : State -> Element
@@ -125,46 +125,53 @@ guessesLeft : State -> Int
 guessesLeft hangman = totalAllowedFailures - (misses hangman)
 
 remainingGuesses : State -> Element
-remainingGuesses hangman = Text.plainText ("You only have " ++ toString (guessesLeft hangman) ++ " incorrect guesses left!")
+remainingGuesses hangman =
+  Text.fromString ("You only have " ++ toString (guessesLeft hangman) ++ " incorrect guesses left!")
+  |> Text.centered
 
 header : Int -> Element
 header w =
   Text.fromString "Hangman"
-    |> Text.height 60
+    |> Text.height 55
     |> Text.centered
     |> width w
 
 displayDeadScene : State -> Int -> Element
 displayDeadScene hangman w =
   flow down [
-    displayGallows hangman |> container w 400 middle,
+    displayGallows hangman |> containerAutoHeight w middle,
     defaultSpacer,
     Text.plainText "Sorry you are DEAD, the word was..."
-      |> container w 50 middle,
+      |> containerAutoHeight w middle,
     hangman.goalWord
       |> Text.fromString
-      |> Text.height 50
+      |> Text.height 34
       |> Text.centered
-      |> container w 50 middle
+      |> containerAutoHeight w middle
   ]
+
+containerAutoHeight : Int -> Position -> Element -> Element
+containerAutoHeight width position elm = container width (heightOf elm) position elm
 
 displayPlayingScene : State -> Int -> Element
 displayPlayingScene hangman w =
   flow down [
-    gallowsAndKeyboard hangman |> container w 350 midTop,
+    gallowsAndKeyboard hangman |> containerAutoHeight w middle,
     defaultSpacer,
-    displayWord hangman.guesses hangman.goalWord |> container w 50 middle,
+    displayWord hangman.guesses hangman.goalWord |> containerAutoHeight w middle,
     defaultSpacer,
-    remainingGuesses hangman |> container w 50 middle
+    remainingGuesses hangman |> containerAutoHeight w middle
   ]
 
 displayWonScene : State -> Int -> Element
 displayWonScene hangman w =
   flow down [
+    defaultSpacer,
     Text.plainText "Congratulations! You got the word!"
-      |> container w 50 middle,
+      |> containerAutoHeight w middle,
+    defaultSpacer,
     displayWord hangman.guesses hangman.goalWord
-      |> container w 50 middle
+      |> containerAutoHeight w middle
     ]
 
 displayBody : State -> Int -> Element
@@ -179,6 +186,6 @@ scene hangman (w, h) =
   let pos = midTopAt (relative 0.5) (absolute 40) in
     flow down [
         header w,
-        container w 600 midTop <| displayBody hangman w
+        containerAutoHeight w middle <| displayBody hangman w
       ]
       |> container w h pos
