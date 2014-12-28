@@ -2799,18 +2799,27 @@ Elm.HangmanView.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $String = Elm.String.make(_elm),
    $Text = Elm.Text.make(_elm);
+   var containerAutoHeight = F3(function (width,
+   position,
+   elm) {
+      return A4($Graphics$Element.container,
+      width,
+      $Graphics$Element.heightOf(elm),
+      position,
+      elm);
+   });
    var header = function (w) {
-      return $Graphics$Element.width(w)($Text.centered($Text.height(60)($Text.fromString("Hangman"))));
+      return $Graphics$Element.width(w)($Text.centered($Text.height(55)($Text.fromString("Hangman"))));
    };
    var guessesLeft = function (hangman) {
       return $HangmanModel.totalAllowedFailures - $HangmanModel.misses(hangman);
    };
    var remainingGuesses = function (hangman) {
-      return $Text.plainText(A2($Basics._op["++"],
+      return $Text.centered($Text.fromString(A2($Basics._op["++"],
       "You only have ",
       A2($Basics._op["++"],
       $Basics.toString(guessesLeft(hangman)),
-      " incorrect guesses left!")));
+      " incorrect guesses left!"))));
    };
    var blackRect = F2(function (w,
    h) {
@@ -2874,7 +2883,7 @@ Elm.HangmanView.make = function (_elm) {
    };
    var displayGuesses = F2(function (guesses,
    word) {
-      return $Text.centered($Text.height(30)($Text.fromString($String.join(" ")($List.map($String.fromChar)($List.filter(function ($) {
+      return $Text.centered($Text.height(21)($Text.fromString($String.join(" ")($List.map($String.fromChar)($List.filter(function ($) {
          return $Basics.not($HangmanModel.wordHasLetter(word)($));
       })(guesses))))));
    });
@@ -2887,30 +2896,15 @@ Elm.HangmanView.make = function (_elm) {
    });
    var displayWord = F2(function (guesses,
    word) {
-      return $Text.centered($Text.height(50)($Text.fromString($String.fromList($List.intersperse(_U.chr(" "))(A2($List.map,
+      return $Text.centered($Text.height(34)($Text.fromString($String.fromList($List.intersperse(_U.chr(" "))(A2($List.map,
       displayLetter(guesses),
       $String.toList(word)))))));
-   });
-   var displayWonScene = F2(function (hangman,
-   w) {
-      return A2($Graphics$Element.flow,
-      $Graphics$Element.down,
-      _L.fromArray([A3($Graphics$Element.container,
-                   w,
-                   50,
-                   $Graphics$Element.middle)($Text.plainText("Congratulations! You got the word!"))
-                   ,A3($Graphics$Element.container,
-                   w,
-                   50,
-                   $Graphics$Element.middle)(A2(displayWord,
-                   hangman.guesses,
-                   hangman.goalWord))]));
    });
    var displayKeyboardBtn = function ($char) {
       return A3($Graphics$Element.container,
       25,
       25,
-      $Graphics$Element.middle)($Text.leftAligned($Text.height(25)($Text.fromString($String.fromChar($char)))));
+      $Graphics$Element.middle)($Text.leftAligned($Text.height(21)($Text.fromString($String.fromChar($char)))));
    };
    var keyboardBtn = F2(function (hangman,
    $char) {
@@ -2996,51 +2990,59 @@ Elm.HangmanView.make = function (_elm) {
                                 0,
                                 10)
                                 ,displayGallows(hangman)]))
-                   ,A2($Graphics$Element.flow,
-                   $Graphics$Element.down,
-                   _L.fromArray([A2($Graphics$Element.spacer,
-                                0,
-                                190)
-                                ,keyboard(hangman)]))]));
+                   ,A4($Graphics$Element.container,
+                   185,
+                   340,
+                   $Graphics$Element.midBottom,
+                   keyboard(hangman))]));
    };
    var displayDeadScene = F2(function (hangman,
    w) {
       return A2($Graphics$Element.flow,
       $Graphics$Element.down,
-      _L.fromArray([A3($Graphics$Element.container,
+      _L.fromArray([A2(containerAutoHeight,
                    w,
-                   400,
                    $Graphics$Element.middle)(displayGallows(hangman))
                    ,defaultSpacer
-                   ,A3($Graphics$Element.container,
+                   ,A2(containerAutoHeight,
                    w,
-                   50,
                    $Graphics$Element.middle)($Text.plainText("Sorry you are DEAD, the word was..."))
-                   ,A3($Graphics$Element.container,
+                   ,A2(containerAutoHeight,
                    w,
-                   50,
-                   $Graphics$Element.middle)($Text.centered($Text.height(50)($Text.fromString(hangman.goalWord))))]));
+                   $Graphics$Element.middle)($Text.centered($Text.height(34)($Text.fromString(hangman.goalWord))))]));
    });
    var displayPlayingScene = F2(function (hangman,
    w) {
       return A2($Graphics$Element.flow,
       $Graphics$Element.down,
-      _L.fromArray([A3($Graphics$Element.container,
+      _L.fromArray([A2(containerAutoHeight,
                    w,
-                   350,
-                   $Graphics$Element.midTop)(gallowsAndKeyboard(hangman))
+                   $Graphics$Element.middle)(gallowsAndKeyboard(hangman))
                    ,defaultSpacer
-                   ,A3($Graphics$Element.container,
+                   ,A2(containerAutoHeight,
                    w,
-                   50,
                    $Graphics$Element.middle)(A2(displayWord,
                    hangman.guesses,
                    hangman.goalWord))
                    ,defaultSpacer
-                   ,A3($Graphics$Element.container,
+                   ,A2(containerAutoHeight,
                    w,
-                   50,
                    $Graphics$Element.middle)(remainingGuesses(hangman))]));
+   });
+   var displayWonScene = F2(function (hangman,
+   w) {
+      return A2($Graphics$Element.flow,
+      $Graphics$Element.down,
+      _L.fromArray([defaultSpacer
+                   ,A2(containerAutoHeight,
+                   w,
+                   $Graphics$Element.middle)($Text.plainText("Congratulations! You got the word!"))
+                   ,defaultSpacer
+                   ,A2(containerAutoHeight,
+                   w,
+                   $Graphics$Element.middle)(A2(displayWord,
+                   hangman.guesses,
+                   hangman.goalWord))]));
    });
    var displayBody = F2(function (hangman,
    w) {
@@ -3067,15 +3069,14 @@ Elm.HangmanView.make = function (_elm) {
                  pos)(A2($Graphics$Element.flow,
                  $Graphics$Element.down,
                  _L.fromArray([header(_v1._0)
-                              ,A3($Graphics$Element.container,
+                              ,A2(containerAutoHeight,
                               _v1._0,
-                              600,
-                              $Graphics$Element.midTop)(A2(displayBody,
+                              $Graphics$Element.middle)(A2(displayBody,
                               hangman,
                               _v1._0))])));
               }();}
          _U.badCase($moduleName,
-         "between lines 179 and 184");
+         "between lines 186 and 191");
       }();
    });
    var hangmanWidth = 500;
@@ -3099,6 +3100,7 @@ Elm.HangmanView.make = function (_elm) {
                              ,remainingGuesses: remainingGuesses
                              ,header: header
                              ,displayDeadScene: displayDeadScene
+                             ,containerAutoHeight: containerAutoHeight
                              ,displayPlayingScene: displayPlayingScene
                              ,displayWonScene: displayWonScene
                              ,displayBody: displayBody
